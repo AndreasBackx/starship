@@ -76,6 +76,7 @@ pub const ALL_MODULES: &[&str] = &[
     "nodejs",
     "ocaml",
     "odin",
+    "ondemand",
     "opa",
     "openstack",
     "os",

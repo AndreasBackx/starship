@@ -18,6 +18,7 @@ pub mod init;
 pub mod logger;
 pub mod module;
 mod modules;
+pub mod ondemand;
 pub mod print;
 mod segment;
 mod utils;

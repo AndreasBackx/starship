@@ -367,6 +367,7 @@ $env_var\
 $mise\
 $crystal\
 $custom\
+$ondemand\
 $sudo\
 $cmd_duration\
 $line_break\
@@ -5323,4 +5324,67 @@ command = 'time /T'
 detect_extensions = ['pst'] # filters *.pst files
 shell = ['pwsh.exe', '-NoProfile', '-Command']
 use_stdin = false
+```
+
+## On-demand items
+
+The `ondemand` module discovers project-local `.starship` directories in the current directory or its parents. These directories are not read until they are allowlisted, because on-demand items can run commands.
+
+Only `[ondemand.NAME]` tables are accepted inside `.starship/*.toml` files. They use the same options as [`custom` commands](#custom-commands). Project-local files cannot configure global `[ondemand]` settings or other Starship modules.
+
+Allowlist a `.starship` directory with:
+
+```sh
+starship allowlist add PATH
+```
+
+`PATH` defaults to the current directory. It may be the `.starship` directory itself or its direct parent. Remove or list entries with:
+
+```sh
+starship allowlist rm PATH
+starship allowlist ls
+```
+
+`remove` is an alias for `rm`, and `list` is an alias for `ls`.
+
+### Options
+
+| Option           | Default                                                         | Description                                                                                   |
+| ---------------- | --------------------------------------------------------------- | --------------------------------------------------------------------------------------------- |
+| `disabled`       | `false`                                                         | Disables the `ondemand` module.                                                               |
+| `format`         | `'$items'`                                                      | The format for approved on-demand items and approval warnings.                                 |
+| `approve_format` | `'[$count new config$suffix (starship allowlist add)](yellow bold) '` | The format shown when unallowlisted `.starship` directories are detected.                      |
+| `item_separator` | `''`                                                            | String inserted between the approval warning and items, and between approved on-demand items.  |
+| `scan_depth`     | `8`                                                             | Number of parent directory levels to scan for `.starship` directories, starting at the current directory. |
+
+### Variables
+
+| Variable | Description                                            |
+| -------- | ------------------------------------------------------ |
+| `items`  | The rendered approval warning and approved items.      |
+
+`approve_format` supports these variables:
+
+| Variable | Description                                      |
+| -------- | ------------------------------------------------ |
+| `count`  | Number of detected unallowlisted `.starship` directories. |
+| `suffix` | `s` when `count` is not 1, otherwise empty.      |
+
+### Example
+
+```toml
+# ~/.config/starship.toml
+[ondemand]
+format = "$items"
+approve_format = "[$count new config$suffix (starship allowlist add)](yellow bold) "
+item_separator = ""
+scan_depth = 8
+```
+
+```toml
+# project/.starship/10-project.toml
+[ondemand.project]
+command = "printf ACME"
+when = true
+format = "[$output](blue) "
 ```

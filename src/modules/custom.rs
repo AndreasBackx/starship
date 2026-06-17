@@ -23,6 +23,14 @@ use crate::{
 /// Finally, the content of the module itself is also set by a command.
 pub fn module<'a>(name: &str, context: &'a Context) -> Option<Module<'a>> {
     let toml_config = get_config(name, context)?;
+    module_from_config(&format!("custom.{name}"), toml_config, context)
+}
+
+pub(crate) fn module_from_config<'a>(
+    module_name: &str,
+    toml_config: &'a toml::Value,
+    context: &'a Context,
+) -> Option<Module<'a>> {
     let config = CustomConfig::load(toml_config);
     if config.disabled {
         return None;
@@ -40,7 +48,7 @@ pub fn module<'a>(name: &str, context: &'a Context) -> Option<Module<'a>> {
     }
 
     // Note: Forward config if `Module` ends up needing `config`
-    let mut module = Module::new(format!("custom.{name}"), config.description, None);
+    let mut module = Module::new(module_name.to_string(), config.description, None);
 
     let mut is_match = context
         .try_begin_scan()?
@@ -97,7 +105,7 @@ pub fn module<'a>(name: &str, context: &'a Context) -> Option<Module<'a>> {
     match parsed {
         Ok(segments) => module.set_segments(segments),
         Err(error) => {
-            log::warn!("Error in module `custom.{name}`:\n{error}");
+            log::warn!("Error in module `{module_name}`:\n{error}");
         }
     };
     Some(module)

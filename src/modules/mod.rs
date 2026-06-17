@@ -69,6 +69,7 @@ mod nix_shell;
 mod nodejs;
 mod ocaml;
 mod odin;
+mod ondemand;
 mod opa;
 mod openstack;
 mod os;
@@ -193,6 +194,7 @@ pub fn handle<'a>(module: &str, context: &'a Context) -> Option<Module<'a>> {
             "nodejs" => nodejs::module(context),
             "ocaml" => ocaml::module(context),
             "odin" => odin::module(context),
+            "ondemand" => ondemand::module(context),
             "opa" => opa::module(context),
             "openstack" => openstack::module(context),
             "os" => os::module(context),
@@ -332,6 +334,7 @@ pub fn description(module: &str) -> &'static str {
         "nodejs" => "The currently installed version of NodeJS",
         "ocaml" => "The currently installed version of OCaml",
         "odin" => "The currently installed version of Odin",
+        "ondemand" => "On-demand project-local prompt items",
         "opa" => "The currently installed version of Open Platform Agent",
         "openstack" => "The current OpenStack cloud and project",
         "os" => "The current operating system",
