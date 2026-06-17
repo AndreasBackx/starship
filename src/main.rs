@@ -10,7 +10,9 @@ use clap_complete::generate;
 use rand::RngExt;
 use starship::context::{Context, Properties, Target};
 use starship::module::ALL_MODULES;
-use starship::{bug_report, configure, init, logger, num_rayon_threads, print, shadow};
+use starship::{
+    bug_report, config, configure, init, logger, num_rayon_threads, ondemand, print, shadow,
+};
 
 #[derive(Parser, Debug)]
 #[clap(
@@ -65,6 +67,11 @@ enum Statuslines {
 
 #[derive(Subcommand, Debug)]
 enum Commands {
+    /// Manage allowlisted on-demand config directories
+    Allowlist {
+        #[clap(subcommand)]
+        command: AllowlistCommand,
+    },
     /// Create a pre-populated GitHub issue with information about your configuration
     BugReport,
     /// Generate starship shell completions for your shell to stdout
@@ -165,6 +172,24 @@ enum Commands {
     ConfigSchema,
 }
 
+#[derive(Subcommand, Debug)]
+enum AllowlistCommand {
+    /// Add a .starship directory to the allowlist
+    Add {
+        #[clap(default_value = ".")]
+        path: PathBuf,
+    },
+    /// Remove a .starship directory from the allowlist
+    #[clap(alias = "remove")]
+    Rm {
+        #[clap(default_value = ".")]
+        path: PathBuf,
+    },
+    /// List allowlisted .starship directories
+    #[clap(alias = "list")]
+    Ls,
+}
+
 fn main() {
     // Configure the current terminal on windows to support ANSI escape sequences.
     #[cfg(windows)]
@@ -214,6 +239,35 @@ fn main() {
     log::trace!("Parsed arguments: {args:#?}");
 
     match args.command {
+        Commands::Allowlist { command } => {
+            let env = Default::default();
+            let config_sources = config::ConfigSources::from_env(&env);
+            match command {
+                AllowlistCommand::Add { path } => {
+                    match ondemand::add_allowlist_path(&config_sources, &path) {
+                        Ok(path) => println!("Added {}", path.display()),
+                        Err(error) => {
+                            eprintln!("{error}");
+                            std::process::exit(1);
+                        }
+                    }
+                }
+                AllowlistCommand::Rm { path } => {
+                    match ondemand::remove_allowlist_path(&config_sources, &path) {
+                        Ok(path) => println!("Removed {}", path.display()),
+                        Err(error) => {
+                            eprintln!("{error}");
+                            std::process::exit(1);
+                        }
+                    }
+                }
+                AllowlistCommand::Ls => {
+                    for path in ondemand::list_allowlist_paths(&config_sources) {
+                        println!("{}", path.display());
+                    }
+                }
+            }
+        }
         Commands::Init {
             shell,
             print_full_init,

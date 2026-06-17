@@ -1,6 +1,7 @@
 use crate::config::{ConfigSources, ModuleConfig, StarshipConfig};
 use crate::configs::StarshipRootConfig;
 use crate::module::Module;
+use crate::ondemand::OndemandState;
 use crate::utils::{CommandOutput, PathExt, create_command, exec_timeout, read_file};
 
 use crate::modules;
@@ -66,6 +67,8 @@ pub struct Context<'a> {
 
     /// Private field to store JJ information for modules who need it
     jj_repo: OnceLock<Option<JJRepo>>,
+
+    ondemand_state: OnceLock<OndemandState>,
 
     /// The shell the user is assumed to be running
     pub shell: Shell,
@@ -188,6 +191,7 @@ impl<'a> Context<'a> {
             dir_contents: OnceLock::new(),
             git_repo: OnceLock::new(),
             jj_repo: OnceLock::new(),
+            ondemand_state: OnceLock::new(),
             shell,
             target,
             width,
@@ -433,6 +437,13 @@ impl<'a> Context<'a> {
                 )
             })
             .as_ref()
+    }
+
+    pub fn ondemand_state(&self) -> &OndemandState {
+        self.ondemand_state.get_or_init(|| {
+            let config_sources = ConfigSources::from_env(&self.env);
+            crate::ondemand::discover(&self.current_dir, &config_sources, &self.root_config)
+        })
     }
 
     fn get_shell() -> Shell {

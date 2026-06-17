@@ -76,6 +76,7 @@ pub mod nix_shell;
 pub mod nodejs;
 pub mod ocaml;
 pub mod odin;
+pub mod ondemand;
 pub mod opa;
 pub mod openstack;
 pub mod os;
@@ -280,6 +281,8 @@ pub struct FullConfig<'a> {
     opa: opa::OpaConfig<'a>,
     #[serde(borrow)]
     openstack: openstack::OspConfig<'a>,
+    #[serde(borrow)]
+    ondemand: ondemand::OndemandConfig<'a>,
     #[serde(borrow)]
     os: os::OSConfig<'a>,
     #[serde(borrow)]

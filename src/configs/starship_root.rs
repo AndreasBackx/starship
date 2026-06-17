@@ -1,6 +1,7 @@
 use indexmap::IndexMap;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
+use toml::value::Table;
 
 pub fn default_profiles() -> IndexMap<String, String> {
     IndexMap::from_iter([(
@@ -34,6 +35,8 @@ pub struct StarshipRootConfig {
     pub user_profiles: IndexMap<String, String>,
     #[serde(skip)]
     pub internal_profiles: IndexMap<String, String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub ondemand: Option<Table>,
 }
 
 pub type Palette = HashMap<String, String>;
@@ -134,6 +137,7 @@ pub const PROMPT_ORDER: &[&str] = &[
     "mise",
     "crystal",
     "custom",
+    "ondemand",
     "sudo",
     "cmd_duration",
     "line_break",
@@ -165,6 +169,7 @@ impl Default for StarshipRootConfig {
             follow_symlinks: true,
             palette: None,
             palettes: HashMap::default(),
+            ondemand: None,
         }
     }
 }
